@@ -36,10 +36,14 @@ const NAV = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const { store, dispatch } = useStore();
+  const { store, dispatch, ready } = useStore();
   const alerts = buildAlerts(store);
   const critical = alerts.filter((a) => a.severity === "critical").length;
   const toReview = store.commitments.filter((c) => c.reviewStatus === "needs_review").length;
+
+  // Statuses depend on today's date and on browser-stored data, so render only
+  // on the client once the store has loaded (avoids hydration mismatches).
+  if (!ready) return <div className="app" />;
 
   return (
     <div className="app">

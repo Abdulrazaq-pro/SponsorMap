@@ -80,6 +80,12 @@ export default function FulfilmentDemo({ compact = false }: { compact?: boolean 
   }
 
   const agreementLines = DEMO_AGREEMENT_TEXT.split("\n");
+  const deliverables = active.filter((c) => c.category !== "Reporting");
+  const unfulfilled = deliverables.filter((c) => evidencedQty(c.clause) === 0);
+  const partial = deliverables.filter((c) => {
+    const got = evidencedQty(c.clause);
+    return got > 0 && got < (c.quantity ?? 1);
+  });
 
   return (
     <div className="card" style={{ overflow: "hidden" }}>
@@ -313,14 +319,30 @@ export default function FulfilmentDemo({ compact = false }: { compact?: boolean 
               })}
             </div>
 
-            <div className="notice red">
-              <Icon name="alert" />
-              <div>
-                <strong>Unfulfilled: A.5 — 6 PA announcements on race day.</strong> No announcement log, script sign-off or audio record was uploaded and the deadline
-                has passed. SponsorMap flags this to the partnerships lead and lists it as outstanding in the sponsor report rather than implying it happened.
-                <div className="small" style={{ marginTop: 4 }}>Also outstanding: A.2 has evidence for 3 of 4 posts.</div>
+            {unfulfilled.length + partial.length > 0 ? (
+              <div className="notice red">
+                <Icon name="alert" />
+                <div>
+                  {unfulfilled.length > 0 && (
+                    <>
+                      <strong>Unfulfilled: {unfulfilled.map((c) => `${c.clause} — ${c.benefit.split(":")[0]}`).join("; ")}.</strong> No evidence was uploaded.
+                      SponsorMap flags this to the partnerships lead and lists it as outstanding in the sponsor report rather than implying it happened.
+                    </>
+                  )}
+                  {partial.length > 0 && (
+                    <div className={unfulfilled.length ? "small" : undefined} style={{ marginTop: unfulfilled.length ? 4 : 0 }}>
+                      {unfulfilled.length ? "Also outstanding: " : "Outstanding: "}
+                      {partial.map((c) => `${c.clause} has evidence for ${fmtNum(evidencedQty(c.clause))} of ${fmtNum(c.quantity ?? 1)}${c.unit ? ` ${c.unit}` : ""}`).join("; ")}.
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="notice">
+                <Icon name="check" />
+                <span>Every confirmed deliverable has evidence on file.</span>
+              </div>
+            )}
 
             <div className="grid-2">
               <div className="card card-pad">

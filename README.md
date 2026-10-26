@@ -20,3 +20,4 @@ Open http://localhost:3100. See `.env.example` for optional AWS and HubSpot sett
 - Important extracted commitments require human review before they are tracked or reported.
 
 All organizations, people and figures in the demo data are fictional.
+# sponsor-map
